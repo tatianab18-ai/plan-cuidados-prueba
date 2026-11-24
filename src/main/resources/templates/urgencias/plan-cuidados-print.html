@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Plan de Cuidados - ' + ${plan.paciente.historiaClinica}">Plan de Cuidados</title>
+    <style>
+        /* Configuración de página para impresión */
+        @page {
+            size: letter landscape; /* Carta horizontal */
+            margin: 8mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111827;
+        }
+
+        body {
+            margin: 0;
+            padding: 12px;
+            font-size: 10px;
+            line-height: 1.3;
+            background: #f3f4f6;
+        }
+
+        /* Hoja contenedor en pantalla */
+        .sheet {
+            background: #ffffff;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 14px;
+            border: 1px solid #d1d5db;
+        }
+
+        /* Barra de botones visible solo en pantalla */
+        .print-toolbar {
+            max-width: 1100px;
+            margin: 0 auto 10px auto;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .btn-primary { background: #1d4ed8; color: #fff; }
+        .btn-secondary { background: #e5e7eb; color: #111827; }
+
+        /* Encabezado institucional */
+        .header-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1.5px solid #1f2937;
+            padding: 6px 10px;
+            margin-bottom: 8px;
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .header-title p {
+            margin: 2px 0 0 0;
+            font-size: 10px;
+            color: #4b5563;
+        }
+
+        /* Tablas compactas clínicas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border: 1px solid #9ca3af;
+            padding: 4px 6px;
+            text-align: left;
+            vertical-align: top;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: normal;
+        }
+
+        th {
+            background-color: #e5e7eb !important;
+            font-weight: bold;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .section-title {
+            background-color: #1f2937 !important;
+            color: #ffffff !important;
+            font-weight: bold;
+            padding: 4px 8px;
+            font-size: 10px;
+            text-transform: uppercase;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Grilla de 2 columnas para aprovechar el ancho horizontal */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            border: 1px solid #374151;
+            padding: 1px 5px;
+            margin: 1px 3px 1px 0;
+            border-radius: 3px;
+            font-size: 9px;
+            background: #f9fafb;
+        }
+
+        .firma-box {
+            margin-top: 14px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .firma-line {
+            width: 45%;
+            border-top: 1px solid #111827;
+            padding-top: 3px;
+            text-align: center;
+            font-size: 9.5px;
+        }
+
+        /* Reglas exclusivas al imprimir */
+        @media print {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .sheet {
+                border: none;
+                padding: 0;
+                max-width: 100%;
+            }
+            table, .section-title, .header-box {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Botones de acción (se ocultan al imprimir) -->
+<div class="print-toolbar no-print">
+    <button type="button" class="btn btn-secondary" onclick="window.close()">Cerrar</button>
+    <button type="button" class="btn btn-primary" onclick="window.print()">Imprimir / Guardar PDF</button>
+</div>
+
+<div class="sheet">
+
+    <!-- 1. ENCABEZADO -->
+    <div class="header-box">
+        <div class="header-title">
+            <h1>Hospital Universitario San José — Servicio de Urgencias</h1>
+            <p>Plan de Cuidados de Enfermería Diario</p>
+        </div>
+        <div>
+            <strong>Fecha del Plan:</strong> <span th:text="${#temporals.format(plan.fechaPlan, 'dd/MM/yyyy')}">20/11/2026</span><br>
+            <strong>N.° Ingreso:</strong> <span th:text="${plan.ingreso.numeroIngreso}">ING-001</span> |
+            <strong>Cama:</strong> <span th:text="${plan.ingreso.cama}">U-12</span>
+        </div>
+    </div>
+
+    <!-- 2. DATOS DEL PACIENTE E INGRESO -->
+    <table>
+        <tr>
+            <th>Paciente</th>
+            <td th:text="${plan.paciente.nombres + ' ' + plan.paciente.apellidos}">Nombre Completo</td>
+            <th>Historia Clínica</th>
+            <td th:text="${plan.paciente.historiaClinica}">1061000000</td>
+            <th>EPS / Entidad</th>
+            <td th:text="${plan.ingreso.entidad}">Nueva EPS</td>
+            <th>Peso</th>
+            <td th:text="${plan.ingreso.peso + ' kg'}">70 kg</td>
+        </tr>
+        <tr>
+            <th>Especialidad</th>
+            <td th:text="${plan.ingreso.especialidad ?: 'N/A'}">Urgencias</td>
+            <th>Diagnóstico</th>
+            <td colspan="5" th:text="${plan.ingreso.diagnosticoIngreso ?: 'Sin registro'}">Diagnóstico de ingreso</td>
+        </tr>
+    </table>
+
+    <!-- 3. BLOQUES CLÍNICOS EN 2 COLUMNAS -->
+    <div class="grid-2">
+
+        <!-- COLUMNA IZQUIERDA -->
+        <div>
+            <!-- Dominios y Riesgos -->
+            <div class="section-title">1. Dominios NANDA, Riesgos y Comentarios</div>
+            <table>
+                <tr>
+                    <th style="width: 30%;">Riesgo Lesión Piel</th>
+                    <td th:text="${plan.dominiosRiesgos.lesionPielNivel}">Bajo</td>
+                </tr>
+                <tr>
+                    <th>Dominios NANDA</th>
+                    <td>
+                        <span class="badge" th:each="dom : ${plan.dominiosRiesgos.dominios}"
+                              th:text="${dom.codigoDominio + ' - ' + dom.nombreDominio}">DOM-01</span>
+                        <span th:if="${#lists.isEmpty(plan.dominiosRiesgos.dominios)}">Ninguno seleccionado</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Riesgos Clínicos</th>
+                    <td>
+                        <th:block th:each="r : ${plan.dominiosRiesgos.riesgosClinicos}" th:if="${r.seleccionado}">
+                            <span class="badge" th:text="${r.tipoRiesgo}">Caídas</span>
+                        </th:block>
+                    </td>
+                </tr>
+                <tr th:if="${!#strings.isEmpty(plan.dominiosRiesgos.comentarios)}">
+                    <th>Comentarios</th>
+                    <td th:text="${plan.dominiosRiesgos.comentarios}">Observaciones</td>
+                </tr>
+            </table>
+
+            <!-- Dietas, Frecuencia y Vigilancia -->
+            <div class="section-title">2. Dietas, Frecuencia, Terapia y Vigilancia</div>
+            <table>
+                <tr>
+                    <th style="width: 30%;">Dieta Indicada</th>
+                    <td>
+                        <span th:text="${plan.dietasFrecuencia.dietaIndicada ?: 'No especificada'}">Dieta blanda</span>
+                        <span class="badge" th:if="${plan.dietasFrecuencia.dejarCena}">Dejar cena</span>
+                        <span class="badge" th:if="${plan.dietasFrecuencia.asistida}">Asistida</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Frecuencias</th>
+                    <td>
+                        <strong>SV cada:</strong> <span th:text="${plan.dietasFrecuencia.frecuenciaMonitoreo.signosVitalesCada + 'h'}">4h</span> |
+                        <strong>Curva T° cada:</strong> <span th:text="${plan.dietasFrecuencia.frecuenciaMonitoreo.curvaTempCada + 'h'}">6h</span> |
+                        <strong>Glasgow cada:</strong> <span th:text="${plan.dietasFrecuencia.frecuenciaMonitoreo.glasgowCada + 'h'}">4h</span><br>
+                        <strong>Posición:</strong> <span th:text="${plan.dietasFrecuencia.frecuenciaMonitoreo.posicion}">Semi-Fowler</span>
+                    </td>
+                </tr>
+                <tr th:if="${plan.dietasFrecuencia.oxigenoterapiaActivo}">
+                    <th>Oxigenoterapia</th>
+                    <td th:text="${plan.dietasFrecuencia.soporteOxigeno}">Cánula nasal 2 L/min</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- COLUMNA DERECHA -->
+        <div>
+            <!-- Seguridad, Movilización y Aislamiento -->
+            <div class="section-title">3. Seguridad, Movilización y Aislamiento</div>
+            <table>
+                <tr>
+                    <th style="width: 30%;">Medidas / Movilización</th>
+                    <td>
+                        <span class="badge" th:if="${plan.seguridadMovilizacion.medidaSujecion}">Sujeción</span>
+                        <span class="badge" th:if="${plan.seguridadMovilizacion.movilizarCama}">Cama</span>
+                        <span class="badge" th:if="${plan.seguridadMovilizacion.movilizarSilla}">C-Silla</span>
+                        <span class="badge" th:if="${plan.seguridadMovilizacion.movilizarDeambular}">Deambular</span>
+                    </td>
+                </tr>
+                <tr th:if="${!#lists.isEmpty(plan.seguridadMovilizacion.aislamientos)}">
+                    <th>Aislamiento</th>
+                    <td>
+                        <div th:each="ais : ${plan.seguridadMovilizacion.aislamientos}">
+                            <strong th:text="${ais.tipoAislamiento}">Contacto</strong>
+                            (<span th:text="${ais.fechaInicio}"></span> a <span th:text="${ais.fechaTerminacion}"></span>)
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${plan.seguridadMovilizacion.curacionActivo}">
+                    <th>Curación</th>
+                    <td>
+                        <div th:each="cur : ${plan.seguridadMovilizacion.curaciones}">
+                            <strong th:text="${cur.tipoCuracion}">Enfermería</strong>:
+                            <span th:text="${cur.escribirEnfermeria ?: cur.fechaComite}">Detalle</span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Cuidados, Sondas y Accesos Venosos -->
+            <div class="section-title">4. Cuidados, Sondas y Accesos Venosos</div>
+            <table>
+                <tr th:if="${plan.cuidadosSondas.sondaVesicalActivo}">
+                    <th style="width: 30%;">Sonda Vesical</th>
+                    <td>
+                        <strong>Cambio:</strong> <span th:text="${plan.cuidadosSondas.fechaCambioVesical ?: 'N/A'}"></span> |
+                        <strong>Cateterismo cada:</strong> <span th:text="${plan.cuidadosSondas.cateterismoCadaHoras ?: 'N/A'}"></span><br>
+                        <strong>Horas:</strong>
+                        <span class="badge" th:each="h : ${plan.cuidadosSondas.horasCateterismo}"
+                              th:text="${h.horaAplicacion + ':00'}">8:00</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Sondas / Drenes</th>
+                    <td>
+                        <th:block th:each="s : ${plan.cuidadosSondas.sondas}" th:if="${s.seleccionado}">
+                            <span class="badge" th:text="${s.tipoSonda + ' (Ins: ' + (s.fechaInsercion ?: '-') + ')'}">SNG</span>
+                        </th:block>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Accesos Venosos</th>
+                    <td>
+                        <th:block th:each="av : ${plan.cuidadosSondas.accesosVenosos}" th:if="${av.seleccionado}">
+                            <span class="badge" th:text="${av.tipoAcceso + ' (Ini: ' + (av.fechaInicio ?: '-') + ')'}">CVC</span>
+                        </th:block>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
